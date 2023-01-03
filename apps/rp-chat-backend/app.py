@@ -3,8 +3,8 @@ from flask_cors import CORS, cross_origin
 from kafka import KafkaProducer, KafkaConsumer
 
 
-BOOTSTRAP_SERVERS = 'localhost:9092'
-TOPIC_NAME = 'messages'
+BOOTSTRAP_SERVERS = # TODO: Set Redpanda bootstrap address
+TOPIC_NAME = # TODO: Set the topic name for the chat
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -14,9 +14,7 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 def send_message():
     try:
         message = request.json
-        producer = KafkaProducer(bootstrap_servers=[BOOTSTRAP_SERVERS])
-        producer.send(TOPIC_NAME, bytes(f'{message}','UTF-8'))
-        producer.close()
+        # TODO: Implement the producer
         return message
     except Exception as err:
         print(f"Unexpected {err=}, {type(err)=}")
@@ -24,10 +22,7 @@ def send_message():
 
 @app.route('/messages', methods=['GET'])
 def get_messages():
-    consumer = KafkaConsumer(TOPIC_NAME,
-                        auto_offset_reset='earliest',
-                        enable_auto_commit=False,
-                        bootstrap_servers=BOOTSTRAP_SERVERS)
+    consumer = None # TODO: Implement the consumer
     def events():
         for message in consumer:
             try:
