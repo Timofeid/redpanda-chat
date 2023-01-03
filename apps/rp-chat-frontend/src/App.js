@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import EventSource from "react-native-sse";
 import "./App.css";
 
-const sse = new EventSource("http://localhost:5000/messages");
+// TODO: Set the event source object by using the event source URL as the parameter.
+const sse = null;
 
 const App = () => {
   const [data, setData] = useState([]);
@@ -21,11 +22,7 @@ const App = () => {
     console.log("Open SSE connection.");
   });
 
-  sse.addEventListener("message", (event) => {
-    console.log("New message event:", event.data);
-    const parsedData = JSON.parse(event.data.replaceAll("'", '"'));
-    setData((data) => [...data, parsedData]);
-  });
+//TODO: Add an event listener for "message" type
 
   sse.addEventListener("error", (event) => {
     if (event.type === "error") {
@@ -54,18 +51,8 @@ const App = () => {
 
   const submit = async (event) => {
     try {
-      let res = await fetch("http://localhost:5000/message", {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify({
-          username: username,
-          text: text,
-          timestamp: Date.now(),
-        }),
-      });
+      //TODO: Implement the HTTP POST that is used to POST the message to the backend
+      let res = null
       if (res.status === 200) {
         setText("");
       } else {
