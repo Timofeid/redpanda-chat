@@ -2,15 +2,15 @@ import { useState, useRef, useEffect } from "react";
 import EventSource from "react-native-sse";
 import "./App.css";
 
-// TODO: Set the event source object by using the event source URL as the parameter.
-const sse = null;
+const HOST = "http://localhost:5001"
+const sse = new EventSource(HOST + "/messages");
 
 const App = () => {
   const [data, setData] = useState([]);
   const [username, setUsername] = useState("");
   const [text, setText] = useState("");
   const textArea = useRef();
-  
+
   useEffect(() => {
     const area = textArea.current;
     area.scrollTop = area.scrollHeight;
@@ -22,7 +22,11 @@ const App = () => {
     console.log("Open SSE connection.");
   });
 
-//TODO: Add an event listener for "message" type
+  sse.addEventListener("message", (event) => {
+    console.log("New message event: ", event.data);
+    const parsedData = JSON.parse(event.data.replaceAll("'", '"'));
+    setData((data) => [...data, parsedData]);
+  });
 
   sse.addEventListener("error", (event) => {
     if (event.type === "error") {
@@ -51,8 +55,18 @@ const App = () => {
 
   const submit = async (event) => {
     try {
-      //TODO: Implement the HTTP POST that is used to POST the message to the backend
-      let res = null
+      let res = await fetch(HOST + "/message", {
+        headers: {
+          Accept: "application/json",
+          "Content-type": "application/json"
+        },
+        method: "POST",
+        body: JSON.stringify({
+          username: username,
+          text: text,
+          timestamp: Date.now()
+        })
+      });
       if (res.status === 200) {
         setText("");
       } else {
@@ -64,42 +78,42 @@ const App = () => {
   };
 
   return (
-    <div class="main-div">
+    <div className="main-div">
       <h2>RPChat</h2>
-      <br/>
+      <br />
       <textarea className="text-area" ref={textArea} readOnly={true} rows="20" cols="70" value=
-      {data.map((message) => (
-        message.username + ": " + message.text
-      )).join("\r\n")}/>
+        {data.map((message) => (
+          message.username + ": " + message.text
+        )).join("\r\n")} />
 
-        <div className="info-box">
-          <input
-            id="username"
-            name="username"
-            type="text"
-            value={username}
-            placeholder="Enter a nickname"
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-        <div className="comments-box">
-          <input
-            value={text}
-            id="text"
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={handleKeyDown}
-            type="text"
-            placeholder="Send a message..."
-          />
-          <button
-            onClick={submit}
-            className="comments-button"
-            id={changeCommentButtonStyle()}
-            disabled={enableCommentButton()}
-          >
-            Post
-          </button>
-        </div>
+      <div className="info-box">
+        <input
+          id="username"
+          name="username"
+          type="text"
+          value={username}
+          placeholder="Enter a nickname"
+          onChange={(e) => setUsername(e.target.value)}
+        />
+      </div>
+      <div className="comments-box">
+        <input
+          value={text}
+          id="text"
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
+          type="text"
+          placeholder="Send a message..."
+        />
+        <button
+          onClick={submit}
+          className="comments-button"
+          id={changeCommentButtonStyle()}
+          disabled={enableCommentButton()}
+        >
+          Post
+        </button>
+      </div>
     </div>
   );
 };
